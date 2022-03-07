@@ -2,6 +2,8 @@
 set(sources ${sources} 
     node.cpp
     node.h
+    processingUnit.cpp
+    processingUnit.h
 )
 
 find_package(Armadillo REQUIRED)

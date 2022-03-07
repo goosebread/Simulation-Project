@@ -9,7 +9,7 @@ class Node{
         double data1;
         arma::vec v;
     public:
-        Node(double data);
+        Node(double data=0);
         double getData1() const;
 };
 
