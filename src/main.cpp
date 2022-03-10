@@ -1,14 +1,25 @@
 #include <iostream>
-#include "Network/node.h"
+#include "Network/environment.h"
+#include "Network/parameterServer.h"
+#include "Network/processingUnit.h"
+#include "Network/event.h"
 
 int main(){
-    double array[] = {2,3,4,56,7};
-    int arraysize = 5;
-    Network::Node n{5.398};
 
-    std::cout<<array[3]<<std::endl;
-    std::cout<<n.getData1()<<std::endl;
+    //create controller and worker
+    Network::ParameterServer* controller = new Network::ParameterServer();
+    Network::ProcessingUnit* worker = new Network::ProcessingUnit();
 
+    //link
+    controller->connectWorker(worker);
+    worker->connectController(controller);
+
+    //add initialization event
+    Network::Environment* env = Network::Environment::getInstance();
+    env->addEvent(Network::Event(0,0,0));
+
+    //run
+    env->runSim();
 
     std::cout<<"hello!";
     return 0;

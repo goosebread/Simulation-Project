@@ -6,13 +6,14 @@ for now, the .vscode folder will be included to facilitate the setting up of bui
 
 -Alex Yeh, March 6 2022
 
+
 use ./build.sh to compile
 use ./run.sh to run whatever's in main
 
 use vscode's launch task to debug
 
-
-
-
 install dependencies?
 sudo apt install libopenblas-dev liblapack-dev libboost-dev libarmadillo-dev 
+
+Progress Log:
+March 9 - most basic simulation set up. 1 server, 1 worker. they schedule and process 5 events

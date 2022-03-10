@@ -4,12 +4,17 @@ set(sources ${sources}
     node.h
     processingUnit.cpp
     processingUnit.h
+    parameterServer.cpp
+    parameterServer.h
+    event.h
+    environment.cpp
+    environment.h
 )
 
-find_package(Armadillo REQUIRED)
+#find_package(Armadillo REQUIRED)
 
-include_directories(${ARMADILLO_INCLUDE_DIRS})
+#include_directories(${ARMADILLO_INCLUDE_DIRS})
 
 add_library(Network ${sources})
-target_link_libraries(Network ${ARMADILLO_LIBRARIES})
+#target_link_libraries(Network ${ARMADILLO_LIBRARIES})
 

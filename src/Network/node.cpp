@@ -1,13 +1,19 @@
 #include "node.h"
+#include "environment.h"
 
 namespace Network{
 
-Node::Node(double data){
-    data1=data;
+Node::Node(){
+    //start naming nodes from 0 so they're easy to index in a list
+    nodeID = totalNodes;
+    ++totalNodes;
+    auto env = Environment::getInstance();
+
+    //nodeID are unique and start from zero anyways
+    env->nodes.push_back(this);
 }
 
-double Node::getData1() const{
-    return data1;
-}
+//initial condition
+int Node::totalNodes = 0;
 
 }//end namespace
