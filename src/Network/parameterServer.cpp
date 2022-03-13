@@ -56,6 +56,9 @@ void ParameterServer::processCompletion(ProcessingUnit* sender){
     if(tasksDone<totalTasks){
         scheduleSendTask(sender->getID());
     }
+    else{
+        std::cout<<"No new tasks; PS is done\n"; 
+    }
 }
 
 //used to define the network
