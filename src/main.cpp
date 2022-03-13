@@ -8,11 +8,15 @@ int main(){
 
     //create controller and worker
     Network::ParameterServer* controller = new Network::ParameterServer();
-    Network::ProcessingUnit* worker = new Network::ProcessingUnit();
+    Network::ProcessingUnit* worker1 = new Network::ProcessingUnit();
+    Network::ProcessingUnit* worker2 = new Network::ProcessingUnit();
 
     //link
-    controller->connectWorker(worker);
-    worker->connectController(controller);
+    controller->connectWorker(worker1);
+    worker1->connectController(controller);
+
+    controller->connectWorker(worker2);
+    worker2->connectController(controller);
 
     //add initialization event
     Network::Environment* env = Network::Environment::getInstance();

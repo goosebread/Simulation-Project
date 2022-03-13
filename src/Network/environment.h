@@ -21,7 +21,7 @@ private:
     Environment();
 
     //queue of events, ordered by time of occurrance
-    std::priority_queue<Network::Event, std::vector<Network::Event>, std::greater<Network::Event> > events;
+    std::priority_queue<Network::Event, std::vector<Network::Event>, std::less<Network::Event> > events;
 
     //"global" variable accessible and updated during simulation
     double currentTime;

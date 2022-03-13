@@ -29,7 +29,7 @@ void ProcessingUnit::doCompletion(){
     //log event
     std::cout<<"worker reporting a completion event to PS\n";
 
-    controller->processCompletion();
+    controller->processCompletion(this);
 }
 
 //used to define the network
