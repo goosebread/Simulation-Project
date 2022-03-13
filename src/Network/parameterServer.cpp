@@ -22,6 +22,7 @@ void ParameterServer::doEvent(int EventID){
 //event 0 initialize event
 void ParameterServer::initializeTasks(int tasks){
     totalTasks=tasks;
+    tasksDone=0;
     //for units in worker map
     for (const auto& worker : workers) {
         scheduleSendTask(worker.second->getID());
@@ -59,6 +60,7 @@ void ParameterServer::processCompletion(ProcessingUnit* sender){
     else{
         std::cout<<"No new tasks; PS is done\n"; 
     }
+    //std::cout<<"total tasks "<<totalTasks<<" tasks Done "<<tasksDone<<std::endl;
 }
 
 //used to define the network
