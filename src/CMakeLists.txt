@@ -2,6 +2,7 @@
 
 
 add_subdirectory(Network)
+add_subdirectory(Utils)
 
 # add the executable
 add_executable(main main.cpp)

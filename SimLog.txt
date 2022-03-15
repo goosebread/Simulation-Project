@@ -1,0 +1,13 @@
+time = 0 node = 0 event = 0
+time = 1 node = 0 event = 1
+time = 1 node = 0 event = 2
+time = 3 node = 1 event = 1
+time = 3 node = 2 event = 1
+time = 4 node = 0 event = 1
+time = 4 node = 0 event = 2
+time = 6 node = 1 event = 1
+time = 6 node = 2 event = 1
+time = 7 node = 0 event = 1
+time = 7 node = 0 event = 2
+time = 9 node = 1 event = 1
+time = 9 node = 2 event = 1

@@ -13,8 +13,11 @@ set(sources ${sources}
 
 #find_package(Armadillo REQUIRED)
 
-#include_directories(${ARMADILLO_INCLUDE_DIRS})
+include_directories("${PROJECT_SOURCE_DIR}/Utils")
 
 add_library(Network ${sources})
-#target_link_libraries(Network ${ARMADILLO_LIBRARIES})
+target_link_libraries(Network PUBLIC Utils)
 
+target_include_directories(Network PUBLIC
+                          "${PROJECT_SOURCE_DIR}/Utils"
+                          )
