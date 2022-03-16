@@ -7,36 +7,36 @@ worker scheduling a completion event
 time = 0.924108 node = 0 event = 1
 PS sending task
 worker scheduling a completion event
-time = 3.11144 node = 1 event = 1
+time = 2.79754 node = 2 event = 1
 worker reporting a completion event to PS
 PS recieved completed task
 scheduling a send task
-time = 3.38875 node = 2 event = 1
+time = 2.92411 node = 1 event = 1
 worker reporting a completion event to PS
 PS recieved completed task
 scheduling a send task
-time = 4.3044 node = 0 event = 1
+time = 3.9905 node = 0 event = 2
 PS sending task
 worker scheduling a completion event
-time = 4.68653 node = 0 event = 2
+time = 4.22189 node = 0 event = 1
 PS sending task
 worker scheduling a completion event
-time = 6.90904 node = 1 event = 1
+time = 5.9905 node = 2 event = 1
 worker reporting a completion event to PS
 PS recieved completed task
 scheduling a send task
-time = 7.97894 node = 2 event = 1
+time = 6.22189 node = 1 event = 1
 worker reporting a completion event to PS
 PS recieved completed task
 scheduling a send task
-time = 8.23346 node = 0 event = 1
+time = 7.31492 node = 0 event = 2
 PS sending task
 worker scheduling a completion event
-time = 9.15256 node = 0 event = 2
+time = 7.3955 node = 0 event = 1
 PS sending task
 worker scheduling a completion event
-time = 9.93905 node = 1 event = 1
+time = 9.31492 node = 2 event = 1
 worker reporting a completion event to PS
 PS recieved completed task
 No new tasks; PS is done
-time = 11.8302 node = 2 event = 1
+time = 9.3955 node = 1 event = 1

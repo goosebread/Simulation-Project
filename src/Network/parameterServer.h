@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
 #include <map>
+#include <random>
+
 #include "node.h"
 #include "event.h"
 #include "processingUnit.h"
@@ -27,7 +29,9 @@ private:
     int totalTasks;//when to stop
     int tasksDone;//running total
 
-    int thinkTime=1;//temporary parameter for basic simulation
+    //random components
+    std::mt19937 rng;
+    std::normal_distribution<double> gaussian;
 
     std::map<int,ProcessingUnit*> workers;//hard-coded connections
 
@@ -46,7 +50,8 @@ private:
     void doSendTask(int workerID);
 
 public:
-    ParameterServer():Node(),totalTasks{0}{
+    ParameterServer(double think_mean, double think_stdev, unsigned seed)
+        :Node(),rng{seed},gaussian{think_mean,think_stdev},totalTasks{0}{
     }
     void doEvent(int EventID) override;
     void connectWorker(ProcessingUnit* unit);

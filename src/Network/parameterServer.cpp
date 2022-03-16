@@ -1,4 +1,5 @@
 #include "parameterServer.h"
+#include "../Utils/logger.h"
 
 namespace Network{
 
@@ -32,25 +33,28 @@ void ParameterServer::initializeTasks(int tasks){
 //schedule an arrival for the processing unit
 void ParameterServer::scheduleSendTask(int workerID){
     auto env = Environment::getInstance();
+    double thinkTime = gaussian(rng);
     Event task{env->getTime()+thinkTime, nodeID, workerID};
     env->addEvent(task);
 
     //log event
-    std::cout<<"scheduling a send task\n";
+    Utils::Logger::getInstance()->file<<"scheduling a send task\n";
 }
 
 //gets run when its actually time to send a task to processing unit
 //bad hard coded names :(
 void ParameterServer::doSendTask(int workerID){
+
     //log event
-    std::cout<<"PS sending task\n";
+    Utils::Logger::getInstance()->file<<"PS sending task\n";
     workers.at(workerID)->processTask();
 }
 
 //Add logic here to control the parameter server's behavior/load balancing
 void ParameterServer::processCompletion(ProcessingUnit* sender){
     //log event
-    std::cout<<"PS recieved completed task\n";
+    auto logger = Utils::Logger::getInstance();
+    logger->file<<"PS recieved completed task\n";
 
     ++tasksDone;
     //keep going if necessary
@@ -58,9 +62,9 @@ void ParameterServer::processCompletion(ProcessingUnit* sender){
         scheduleSendTask(sender->getID());
     }
     else{
-        std::cout<<"No new tasks; PS is done\n"; 
+        logger->file<<"No new tasks; PS is done\n"; 
     }
-    //std::cout<<"total tasks "<<totalTasks<<" tasks Done "<<tasksDone<<std::endl;
+    //logger->file<<"total tasks "<<totalTasks<<" tasks Done "<<tasksDone<<std::endl;
 }
 
 //used to define the network

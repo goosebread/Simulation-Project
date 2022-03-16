@@ -20,9 +20,6 @@ void Environment::runSim(){
 
         //log data
         auto logger = Utils::Logger::getInstance();
-        //nodeID are unique and start from zero anyways
-        //(*logger)("time = ");(*logger)(current.time);//logger->(" node = ");logger(current.NodeID);
-        //logger(" event = ");logger(current.EventID);logger("\n");
         logger->file<<"time = "<<current.time<<" node = "<<current.NodeID<<" event = "<<current.EventID<<std::endl;
 
         //run the event
