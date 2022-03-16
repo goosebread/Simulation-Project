@@ -49,7 +49,14 @@ private:
     //calls instantaneous functions of other nodes
     void doSendTask(int workerID);
 
+    //sends a task to the queue
+    void toQueue(int workerID);
 public:
+    bool busy;
+
+    //queue of destinations to send tasks to (think time process is limited by one processor)
+    std::queue<int> sendQueue;
+
     ParameterServer(double think_mean, double think_stdev, unsigned seed)
         :Node(),rng{seed},gaussian{think_mean,think_stdev},totalTasks{0}{
     }

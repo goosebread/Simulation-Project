@@ -18,3 +18,4 @@ sudo apt install libopenblas-dev liblapack-dev libboost-dev libarmadillo-dev
 Progress Log:
 March 9 - most basic simulation set up. 1 server, 1 worker. they schedule and process 5 events
 Mar 13 - 1 server many workers
+Mar 16 - add logger, random components, queue on PS thinking process

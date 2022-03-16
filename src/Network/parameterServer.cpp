@@ -22,15 +22,28 @@ void ParameterServer::doEvent(int EventID){
 
 //event 0 initialize event
 void ParameterServer::initializeTasks(int tasks){
+    busy=false;
     totalTasks=tasks;
     tasksDone=0;
     //for units in worker map
     for (const auto& worker : workers) {
-        scheduleSendTask(worker.second->getID());
+        toQueue(worker.second->getID());
+    }
+}
+
+//"arrival"
+void ParameterServer::toQueue(int workerID){
+    if(busy){
+        sendQueue.push(workerID);
+    }
+    else{
+        scheduleSendTask(workerID);
+        busy=true;
     }
 }
 
 //schedule an arrival for the processing unit
+//this process has think time
 void ParameterServer::scheduleSendTask(int workerID){
     auto env = Environment::getInstance();
     double thinkTime = gaussian(rng);
@@ -43,11 +56,21 @@ void ParameterServer::scheduleSendTask(int workerID){
 
 //gets run when its actually time to send a task to processing unit
 //bad hard coded names :(
+//"departure"
 void ParameterServer::doSendTask(int workerID){
 
     //log event
     Utils::Logger::getInstance()->file<<"PS sending task\n";
     workers.at(workerID)->processTask();
+
+    //start next process
+    if (sendQueue.empty()){
+        busy=false;
+    }
+    else{
+        scheduleSendTask(sendQueue.front());
+        sendQueue.pop();
+    }
 }
 
 //Add logic here to control the parameter server's behavior/load balancing
@@ -59,7 +82,7 @@ void ParameterServer::processCompletion(ProcessingUnit* sender){
     ++tasksDone;
     //keep going if necessary
     if(tasksDone<totalTasks){
-        scheduleSendTask(sender->getID());
+        toQueue(sender->getID());
     }
     else{
         logger->file<<"No new tasks; PS is done\n"; 
