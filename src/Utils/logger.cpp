@@ -22,12 +22,13 @@ Logger::Logger(){
     else{
         filepath = filepath_base;
     }
-    //we know this file doesn't exist yet since it can't open for reading
+    //we know this file  doesn't exist yet since it can't open for reading
     //so we can use it for writing
     file.open(filepath+".txt");
 }
 
 Logger::~Logger(){
+    file<<std::flush;
     file.close();
 }
 

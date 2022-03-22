@@ -30,16 +30,14 @@ private:
     ParameterServer* controller;
 
     //sends time of completion to event handler
-    void scheduleCompletion();
+    void schedulePush();
 
     //gets called when task arrives/send event occurs
-    void processTask(){
-        scheduleCompletion();
-    }
+    void processPull();
 
     //event 1, gets called when event handler says time=completion
     //calls instantaneous functions of other nodes
-    void doCompletion();
+    void doPush();
 
 public:
     ProcessingUnit(double service_mean, double service_stdev, unsigned seed)

@@ -7,15 +7,11 @@
 #include "event.h"
 #include "processingUnit.h"
 
-//A temporary class until we figure out the specifics of the parameter server
-//right now it just runs 5 hard coded tasks as the initilization function
-//and hard-coded to have 1 connection with a processingUnit
-
-//assuming homogenous tasks, round-robin initialization, tasks are sent to whoever's idle after that for load balancing
-//(task 1 and task 2 are interchangable: all that matters is 5 tasks get run) 
-//program stops when the last task is received by PS. workers may still be doing extra tasks
-
-//it schedules and runs tasks just fine
+//gen 1 parameter server
+//the PS has a max iterations /total tasks value
+//it needs all workers to finish pushing on iteration i before starting iteration i+1
+//think time/update time is built in (time between the last push of iteration i and the pulls of iteration i+1)
+//assume that all workers can pull at same time
 
 namespace Network{
 
@@ -34,28 +30,33 @@ private:
     std::normal_distribution<double> gaussian;
 
     std::map<int,ProcessingUnit*> workers;//hard-coded connections
+    std::map<int,bool> updateTracker;//could turn this into regular array with normal indexing in future
+    //if we need constant access time as opposed to log n access
 
-    //schedules next task after think time
-    void scheduleSendTask(int workerID);
+    //schedules next task after think/update time
+    //all workers pull at the same time/synchronized
+    void schedulePull();
 
     //gets called by ProcessingUnit function when task completes
     //send the next task to this sender
-    void processCompletion(ProcessingUnit* sender);
+    //check update
+    void processPush(int workerID);
 
     //event 0 initialize event
-    void initializeTasks(int tasks=5);
+    void initializeTasks(int tasks=3);
 
     //event 1, gets called when event handler says time=arrival
     //calls instantaneous functions of other nodes
-    void doSendTask(int workerID);
+    void doPull(int workerID);
 
+    void checkUpdate();
     //sends a task to the queue
-    void toQueue(int workerID);
+    //void toQueue(int workerID);
 public:
     bool busy;
 
     //queue of destinations to send tasks to (think time process is limited by one processor)
-    std::queue<int> sendQueue;
+    //std::queue<int> sendQueue;
 
     ParameterServer(double think_mean, double think_stdev, unsigned seed)
         :Node(),rng{seed},gaussian{think_mean,think_stdev},totalTasks{0}{

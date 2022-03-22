@@ -7,7 +7,7 @@ namespace Network{
 void ProcessingUnit::doEvent(int EventID){
     switch(EventID){
         case 1: 
-            doCompletion();
+            doPush();
             break;
         default:
             std::cerr<<"INVALID EVENT ID "<<EventID<<" FROM NODE "<<getID();
@@ -15,28 +15,33 @@ void ProcessingUnit::doEvent(int EventID){
 }
 
 //schedule a completion when a task arrives
-void ProcessingUnit::scheduleCompletion(){
+void ProcessingUnit::schedulePush(){
     auto env = Environment::getInstance();
     double serviceTime = gaussian(rng);
     Event task{env->getTime()+serviceTime, nodeID,1};
     env->addEvent(task);
 
     //log event
-    Utils::Logger::getInstance()->file<<"worker scheduling a completion event\n";
+    Utils::Logger::getInstance()->file<<"worker scheduling a push event\n";
 }
 
 //gets run when its actually time to report a completed task
 //bad hard coded names :(
-void ProcessingUnit::doCompletion(){
+void ProcessingUnit::doPush(){
     //log event
-    Utils::Logger::getInstance()->file<<"worker reporting a completion event to PS\n";
+    Utils::Logger::getInstance()->file<<"worker pushing to PS\n";
 
-    controller->processCompletion(this);
+    controller->processPush(getID());
 }
 
 //used to define the network
 void ProcessingUnit::connectController(ParameterServer* unit){
     controller = unit;
+}
+
+void ProcessingUnit::processPull(){
+    Utils::Logger::getInstance()->file<<"Worker pulling from PS\n";
+    schedulePush();
 }
 
 }//end namespace

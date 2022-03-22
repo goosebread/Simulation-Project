@@ -26,6 +26,9 @@ void Environment::runSim(){
         currentTime = current.time;
         nodes.at(current.NodeID)->doEvent(current.EventID);
     }
+
+    //if we don't have this line the logger will sometimes close before printing all data from buffer
+    Utils::Logger::getInstance()->file<<std::flush;
 }
 
 }//end namespace network
