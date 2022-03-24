@@ -7,9 +7,9 @@
 int main(){
 
     //create controller and worker
-    Network::ParameterServer* controller = new Network::ParameterServer(1,0,191349);
+    Network::ParameterServer* controller = new Network::ParameterServer(1,0,4, 2, 191349);
     Network::ProcessingUnit* worker1 = new Network::ProcessingUnit(2,0.3,36857);
-    Network::ProcessingUnit* worker2 = new Network::ProcessingUnit(3,0.4,239876);
+    Network::ProcessingUnit* worker2 = new Network::ProcessingUnit(4,0.4,239876);
 
     //link
     controller->connectWorker(worker1);

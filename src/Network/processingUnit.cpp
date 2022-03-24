@@ -14,7 +14,7 @@ void ProcessingUnit::doEvent(int EventID){
     }
 }
 
-//schedule a completion when a task arrives
+//schedule a push after pulling
 void ProcessingUnit::schedulePush(){
     auto env = Environment::getInstance();
     double serviceTime = gaussian(rng);
@@ -29,9 +29,9 @@ void ProcessingUnit::schedulePush(){
 //bad hard coded names :(
 void ProcessingUnit::doPush(){
     //log event
-    Utils::Logger::getInstance()->file<<"worker pushing to PS\n";
+    Utils::Logger::getInstance()->file<<"worker pushing to PS, iteration "<<iteration<<"\n";
 
-    controller->processPush(getID());
+    controller->processPush(getID(),iteration);
 }
 
 //used to define the network
@@ -40,7 +40,8 @@ void ProcessingUnit::connectController(ParameterServer* unit){
 }
 
 void ProcessingUnit::processPull(){
-    Utils::Logger::getInstance()->file<<"Worker pulling from PS\n";
+    iteration++;
+    Utils::Logger::getInstance()->file<<"Worker pulling from PS, iteration "<<iteration<<"\n";
     schedulePush();
 }
 

@@ -21,6 +21,8 @@ class ProcessingUnit : public Node{
 friend ParameterServer;
 
 private:
+    int iteration;
+
 
     //random components
     std::mt19937 rng;
@@ -39,9 +41,11 @@ private:
     //calls instantaneous functions of other nodes
     void doPush();
 
+    void reset(){ iteration=0;}
+
 public:
     ProcessingUnit(double service_mean, double service_stdev, unsigned seed)
-        :Node(),rng{seed},gaussian{service_mean,service_stdev}{
+        :Node(),rng{seed},gaussian{service_mean,service_stdev},iteration{0}{
     }
 
     void connectController(ParameterServer* unit);
