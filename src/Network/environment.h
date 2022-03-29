@@ -27,9 +27,7 @@ private:
     double currentTime;
 
 public:
-    //enforce singleton
-    //call the static method getInstance() 
-    //instead of trying to create Environment objects yourself
+    //singleton accessor function 
     static Environment* getInstance() {
         if (!instance)
         instance = new Environment();

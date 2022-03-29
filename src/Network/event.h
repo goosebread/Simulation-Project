@@ -1,6 +1,6 @@
 #pragma once
 //An event is defined by a time of occurrance 
-//and a Node/Event identifier for the appropriate function that will occur
+//and a (Node,Event) identifier for the appropriate function that will occur
 
 namespace Network{
 

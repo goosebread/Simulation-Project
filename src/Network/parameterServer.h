@@ -1,23 +1,36 @@
 #pragma once
 #include <iostream>
 #include <map>
+#include <vector>
+#include <forward_list>
+
 #include <random>
 
 #include "node.h"
 #include "event.h"
 #include "processingUnit.h"
 
-//A temporary class until we figure out the specifics of the parameter server
-//right now it just runs 5 hard coded tasks as the initilization function
-//and hard-coded to have 1 connection with a processingUnit
+//vector of units, "hold/wait"
+//send units to the wait vector if they're too far ahead
+//upon update empty the hold vector and let them pull
 
-//assuming homogenous tasks, round-robin initialization, tasks are sent to whoever's idle after that for load balancing
-//(task 1 and task 2 are interchangable: all that matters is 5 tasks get run) 
-//program stops when the last task is received by PS. workers may still be doing extra tasks
+//create a matrix as the rotating window (mod windowsize to reuse space as things fill up)
+//each row is an iteration group
+//each col is worker status (0 for not done yet, 1 for done)
 
-//it schedules and runs tasks just fine
+//or list/vector of "iterationStatus structs/maps"
+
+//we need more information being communicated between ps and workers (eg iteration group )
+
 
 namespace Network{
+
+struct Stats{
+    double throughput;
+    double avgUtilization;
+
+    Stats(double tpt=0, double utl=0):throughput{tpt}, avgUtilization{utl}{}
+};
 
 //forward class declaration
 class ProcessingUnit;
@@ -26,43 +39,61 @@ class ParameterServer : public Node{
 friend ProcessingUnit;
 
 private:
-    int totalTasks;//when to stop
-    int tasksDone;//running total
+    int totalTasks;//when to stop/max iterations
+    int tasksDone;//current iteration
+
+    int windowSize;//for bounded delay model
 
     //random components
-    std::mt19937 rng;
-    std::normal_distribution<double> gaussian;
+    //std::mt19937 rng;
+    //std::normal_distribution<double> gaussian;
 
-    std::map<int,ProcessingUnit*> workers;//hard-coded connections
+    //keeps track of workers to call their functions
+    std::map<int,ProcessingUnit*> workers;
 
-    //schedules next task after think time
-    void scheduleSendTask(int workerID);
+    //vector could be replaces with fixed size array (window size fixed)
+    //map could be simplified to array if worker IDs are guaranteed to be integers (safer to go more general key pair route)
+    //each index t of vector is a slot in the time window
+    //each value in vector is a list of workers completion status for iteration t
+    std::vector<std::map<int,bool>*> updateTracker;
+
+    //place to store workers that are too far ahead and must wait for PS to update
+    std::forward_list<int> idleWorkers;//holding
+
+    //schedules a pull event
+    void schedulePull(int workerID);
+
+    //event 1, calls instantaneous functions of other nodes
+    void doPull(int workerID);
 
     //gets called by ProcessingUnit function when task completes
-    //send the next task to this sender
-    void processCompletion(ProcessingUnit* sender);
+    //calls checkUpdate
+    void processPush(int workerID, int iteration);
 
-    //event 0 initialize event
-    void initializeTasks(int tasks=5);
+    //checks to see if the Parameter server can move on to the next iteration
+    void checkUpdate();
 
-    //event 1, gets called when event handler says time=arrival
-    //calls instantaneous functions of other nodes
-    void doSendTask(int workerID);
+    //event 0 initialization event
+    void initializeTasks();
 
-    //sends a task to the queue
-    void toQueue(int workerID);
 public:
-    bool busy;
-
-    //queue of destinations to send tasks to (think time process is limited by one processor)
-    std::queue<int> sendQueue;
-
-    ParameterServer(double think_mean, double think_stdev, unsigned seed)
-        :Node(),rng{seed},gaussian{think_mean,think_stdev},totalTasks{0}{
-    }
+    ParameterServer(int tasks, int windowSz);
     void doEvent(int EventID) override;
     void connectWorker(ProcessingUnit* unit);
-    //~ParameterServer(){}
+
+    ~ParameterServer(){
+        for (int i=0; i<windowSize; i++){
+            delete updateTracker[i];
+        }
+    }
+
+    //track jobs done per unit time
+    //lets make it check for all first and later make it distributed
+    //sacrifice efficiency for "I need to have this working today"
+
+    //void updateStats() override;
+
+    Stats outputStats();
 };
 
 }//end namespace
