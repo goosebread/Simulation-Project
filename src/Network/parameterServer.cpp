@@ -9,7 +9,7 @@ ParameterServer::ParameterServer(int tasks, int windowSz)
     //window = 0 case
     updateTracker.push_back(new std::map<int,bool>());
     //windowsize > 0
-    for (int i=1; i<windowSize; i++){
+    for (int i=1; i<windowSize+1; i++){
         updateTracker.push_back(new std::map<int,bool>());
     }
 }
@@ -67,10 +67,10 @@ void ParameterServer::processPush(int workerID,int iteration){
     //will start at index 1 to indicate that task 1 for iteration 1 is complete
     int index = 0;
     if(windowSize){
-        index = iteration%windowSize;
+        index = iteration%(windowSize+1);
     }
 
-    updateTracker.at(index)->at(workerID) = true;
+    updateTracker[index]->operator[](workerID) = true;
 
     //exit condition for simulation //NOTE if a worker reaches the last iteration, 
     //it will be idle but not in idleWorkers, which is meant as a temporary holding space
@@ -105,7 +105,7 @@ void ParameterServer::checkUpdate(){
 
     int index = 0;
     if(windowSize){
-        index = (tasksDone+1)%windowSize;
+        index = (tasksDone+1)%(windowSize+1);
     }
     auto mapRef = *updateTracker.at(index);
 
@@ -126,7 +126,7 @@ void ParameterServer::checkUpdate(){
             workerStatus.second = false;
 
             //FIX LATER i think the reference may not be set up properly which is why this doesn't like to reset
-            updateTracker.at(index)->at(workerStatus.first)=false;
+            updateTracker[index]->operator[](workerStatus.first)=false;
         }
         Utils::Logger::getInstance()->file<<"PS iteration "<<tasksDone<<" complete\n";
     }
@@ -139,7 +139,7 @@ void ParameterServer::connectWorker(ProcessingUnit* unit){
     updateTracker[0]->operator[](unit->getID())=false;
 
     //for window>0
-    for (int i=1; i<windowSize; i++){
+    for (int i=1; i<windowSize+1; i++){
         updateTracker[i]->operator[](unit->getID())=false;
     }
 }

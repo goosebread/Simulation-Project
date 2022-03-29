@@ -13,7 +13,7 @@ int main(){
     
     int iters = 10000;
     int n_Workers = 3;
-    int window = 3;
+    int window = 12;
     double CV = 2;
 
     //should be good enough for generating seeds
