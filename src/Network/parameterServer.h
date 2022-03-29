@@ -25,6 +25,13 @@
 
 namespace Network{
 
+struct Stats{
+    double throughput;
+    double avgUtilization;
+
+    Stats(double tpt=0, double utl=0):throughput{tpt}, avgUtilization{utl}{}
+};
+
 //forward class declaration
 class ProcessingUnit;
 
@@ -38,8 +45,8 @@ private:
     int windowSize;//for bounded delay model
 
     //random components
-    std::mt19937 rng;
-    std::normal_distribution<double> gaussian;
+    //std::mt19937 rng;
+    //std::normal_distribution<double> gaussian;
 
     //keeps track of workers to call their functions
     std::map<int,ProcessingUnit*> workers;
@@ -70,12 +77,7 @@ private:
     void initializeTasks();
 
 public:
-    ParameterServer(double think_mean, double think_stdev,int tasks, int windowSz, unsigned seed)
-        :Node(),rng{seed},gaussian{think_mean,think_stdev},totalTasks{tasks},windowSize{windowSz}{
-        for (int i=0; i<windowSize; i++){
-            updateTracker.push_back(new std::map<int,bool>());
-        }
-    }
+    ParameterServer(int tasks, int windowSz);
     void doEvent(int EventID) override;
     void connectWorker(ProcessingUnit* unit);
 
@@ -84,6 +86,14 @@ public:
             delete updateTracker[i];
         }
     }
+
+    //track jobs done per unit time
+    //lets make it check for all first and later make it distributed
+    //sacrifice efficiency for "I need to have this working today"
+
+    //void updateStats() override;
+
+    Stats outputStats();
 };
 
 }//end namespace

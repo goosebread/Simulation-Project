@@ -16,6 +16,11 @@ public:
 
     //calls a function depending on eventID code
     virtual void doEvent(int EventID)=0;
+
+    //updates the collected stats as time progresses
+    //default  = do nothing
+    virtual void updateStats(){}
+
     //virtual ~Node()=0;
 };
 

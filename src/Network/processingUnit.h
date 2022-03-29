@@ -22,11 +22,16 @@ friend ParameterServer;
 
 private:
     int iteration;
-
+    
+    bool busy;
+    double t_last;
+    double t_busy;
 
     //random components
+    //actually, a gamma distribution is appropriate
+    //we want positive values, a mean of 1, and some control over variance
     std::mt19937 rng;
-    std::normal_distribution<double> gaussian;
+    std::gamma_distribution<double> gamma;
 
     //hard coded connection
     ParameterServer* controller;
@@ -41,15 +46,19 @@ private:
     //calls instantaneous functions of other nodes
     void doPush();
 
-    void reset(){ iteration=0;}
+    void reset();
 
 public:
-    ProcessingUnit(double service_mean, double service_stdev, unsigned seed)
-        :Node(),rng{seed},gaussian{service_mean,service_stdev},iteration{0}{
+    ProcessingUnit(double CV, unsigned seed)
+        :Node(),rng{seed},gamma{1.0/CV*CV,(CV*CV)},
+        iteration{0},t_last{0},t_busy{0},busy{false}{
     }
 
     void connectController(ParameterServer* unit);
     void doEvent(int EventID) override;
+
+    //for now it only tracks utilization. Eventually, we might want higher order stats
+    void updateStats() override;
     //~ProcessingUnit(){}
 };
 

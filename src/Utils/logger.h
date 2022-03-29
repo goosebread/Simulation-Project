@@ -17,7 +17,8 @@ private:
     ~Logger();
 
 public:
-    //just use this?
+    //its honestly easier to expose this to the caller
+    //but we just have to be dilligent about not abusing this
     std::ofstream file;
 
     static Logger* getInstance() {

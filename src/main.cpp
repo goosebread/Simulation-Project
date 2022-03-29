@@ -1,22 +1,36 @@
 #include <iostream>
+#include <vector>
+#include <cstdlib>
+
 #include "Network/environment.h"
 #include "Network/parameterServer.h"
 #include "Network/processingUnit.h"
 #include "Network/event.h"
 
+
+//Network::Stats createSim(int workers, int window, int CV, unsigned seed)
 int main(){
+    
+    int iters = 10000;
+    int n_Workers = 3;
+    int window = 3;
+    double CV = 2;
+
+    //should be good enough for generating seeds
+    std::srand(293687);
 
     //create controller and worker
-    Network::ParameterServer* controller = new Network::ParameterServer(1,0,4, 2, 191349);
-    Network::ProcessingUnit* worker1 = new Network::ProcessingUnit(2,0.3,36857);
-    Network::ProcessingUnit* worker2 = new Network::ProcessingUnit(4,0.4,239876);
+    Network::ParameterServer* controller = new Network::ParameterServer(iters, window);//hard coded network delay 0.01
 
-    //link
-    controller->connectWorker(worker1);
-    worker1->connectController(controller);
+    std::vector<Network::ProcessingUnit*> workers;
+    for (int i=0; i<n_Workers;i++){
+        auto wkr = new Network::ProcessingUnit(CV,std::rand());
+        workers.push_back(wkr);
 
-    controller->connectWorker(worker2);
-    worker2->connectController(controller);
+        //link
+        controller->connectWorker(wkr);
+        wkr->connectController(controller);
+    }
 
     //add initialization event
     Network::Environment* env = Network::Environment::getInstance();
@@ -26,5 +40,17 @@ int main(){
     env->runSim();
 
     std::cout<<"Simulation Complete\n";
+
+    //change later for better interface
+    Network::Stats s = controller->outputStats();
+    std::cout<<"Throughput = "<<s.throughput<<std::endl;
+    std::cout<<"Average Utilization = "<<s.avgUtilization<<std::endl;
+
+    //clean up
+    delete controller;
+    for (int i=0; i<n_Workers;i++){
+        delete workers[i];
+    }
+
     return 0;
 }

@@ -17,7 +17,7 @@ void ProcessingUnit::doEvent(int EventID){
 //schedule a push after pulling
 void ProcessingUnit::schedulePush(){
     auto env = Environment::getInstance();
-    double serviceTime = gaussian(rng);
+    double serviceTime = gamma(rng);
     Event task{env->getTime()+serviceTime, nodeID,1};
     env->addEvent(task);
 
@@ -30,7 +30,7 @@ void ProcessingUnit::schedulePush(){
 void ProcessingUnit::doPush(){
     //log event
     Utils::Logger::getInstance()->file<<"worker pushing to PS, iteration "<<iteration<<"\n";
-
+    busy=false;
     controller->processPush(getID(),iteration);
 }
 
@@ -42,7 +42,18 @@ void ProcessingUnit::connectController(ParameterServer* unit){
 void ProcessingUnit::processPull(){
     iteration++;
     Utils::Logger::getInstance()->file<<"Worker pulling from PS, iteration "<<iteration<<"\n";
+    busy=true;
     schedulePush();
 }
-
+void ProcessingUnit::updateStats(){
+    double t_current = Environment::getInstance()->getTime();
+    if(busy){ t_busy+=(t_current-t_last); }
+    t_last = t_current;
+}
+void ProcessingUnit::reset(){
+    iteration=0;
+    t_last=0;
+    t_busy=0;
+    busy=false;
+}
 }//end namespace

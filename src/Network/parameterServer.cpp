@@ -3,6 +3,17 @@
 
 namespace Network{
 
+ParameterServer::ParameterServer(int tasks, int windowSz)
+    :Node(),totalTasks{tasks},windowSize{windowSz}{
+
+    //window = 0 case
+    updateTracker.push_back(new std::map<int,bool>());
+    //windowsize > 0
+    for (int i=1; i<windowSize; i++){
+        updateTracker.push_back(new std::map<int,bool>());
+    }
+}
+
 //legal functions for event handler to call
 void ParameterServer::doEvent(int EventID){
     switch(EventID){
@@ -33,7 +44,7 @@ void ParameterServer::initializeTasks(){
 void ParameterServer::schedulePull(int workerID){
     auto env = Environment::getInstance();
 
-    constexpr double networkDelay = 0.5;//TODO MAKE THIS REAL VARIABLE
+    constexpr double networkDelay = 0.01;//TODO MAKE THIS REAL VARIABLE
 
     Event task{env->getTime()+networkDelay, nodeID, workerID};
     env->addEvent(task);
@@ -54,8 +65,13 @@ void ParameterServer::processPush(int workerID,int iteration){
     Utils::Logger::getInstance()->file<<"PS recieved push\n";
 
     //will start at index 1 to indicate that task 1 for iteration 1 is complete
-    updateTracker.at(iteration%windowSize)->at(workerID) = true;
-    
+    int index = 0;
+    if(windowSize){
+        index = iteration%windowSize;
+    }
+
+    updateTracker.at(index)->at(workerID) = true;
+
     //exit condition for simulation //NOTE if a worker reaches the last iteration, 
     //it will be idle but not in idleWorkers, which is meant as a temporary holding space
     if(iteration<totalTasks){
@@ -64,6 +80,11 @@ void ParameterServer::processPush(int workerID,int iteration){
         if (iteration==tasksDone+1+windowSize){
             Utils::Logger::getInstance()->file<<"worker "<<workerID<<" to idle\n";
             idleWorkers.push_front(workerID);
+
+            //zero window case
+            if(!windowSize){
+                checkUpdate();
+            }
         }
         else{
             //if this iteration is the bottleneck for PS
@@ -81,7 +102,13 @@ void ParameterServer::processPush(int workerID,int iteration){
 void ParameterServer::checkUpdate(){
     //update if all workers are done/TRUE for the next task
     bool status = true;
-    auto mapRef = *updateTracker.at((tasksDone+1)%windowSize);
+
+    int index = 0;
+    if(windowSize){
+        index = (tasksDone+1)%windowSize;
+    }
+    auto mapRef = *updateTracker.at(index);
+
     for (const auto& workerStatus : mapRef) {
         status = status && workerStatus.second;
         if (!status) break;
@@ -97,6 +124,9 @@ void ParameterServer::checkUpdate(){
         //reset tracker
         for (auto& workerStatus : mapRef) {
             workerStatus.second = false;
+
+            //FIX LATER i think the reference may not be set up properly which is why this doesn't like to reset
+            updateTracker.at(index)->at(workerStatus.first)=false;
         }
         Utils::Logger::getInstance()->file<<"PS iteration "<<tasksDone<<" complete\n";
     }
@@ -106,9 +136,27 @@ void ParameterServer::checkUpdate(){
 void ParameterServer::connectWorker(ProcessingUnit* unit){
     //insert pointer to map
     workers[unit->getID()] = unit;
-    for (int i=0; i<windowSize; i++){
+    updateTracker[0]->operator[](unit->getID())=false;
+
+    //for window>0
+    for (int i=1; i<windowSize; i++){
         updateTracker[i]->operator[](unit->getID())=false;
     }
+}
+
+Stats ParameterServer::outputStats(){
+    Stats s = Stats();
+    double time = Environment::getInstance()->getTime();
+    s.throughput = tasksDone/time;
+    double total_busy = 0;
+    for (const auto worker:workers){
+        total_busy+=worker.second->t_busy;
+        std::cout<<worker.second->t_busy<<std::endl;
+    }
+    std::cout<<time<<std::endl;
+    std::cout<<workers.size()<<std::endl;
+    s.avgUtilization = total_busy/(time*workers.size());
+    return s;
 }
 
 }//end namespace
