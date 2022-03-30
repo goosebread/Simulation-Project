@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
+#include <string>
 
 #include "Network/environment.h"
 #include "Network/parameterServer.h"
@@ -9,12 +10,17 @@
 
 
 //Network::Stats createSim(int workers, int window, int CV, unsigned seed)
-int main(){
+int main(int argc,char* argv[]){
     
-    int iters = 10000;
-    int n_Workers = 3;
-    int window = 12;
-    double CV = 2;
+    if (argc!=5){
+        std::cerr<<"Wrong number of arguments";
+        return 0;
+    }
+
+    int iters = std::stoi(std::string(argv[1]));//10000;
+    int n_Workers = std::stoi(std::string(argv[2]));//3;
+    int window = std::stoi(std::string(argv[3]));//12;
+    double CV = std::stod(std::string(argv[4]));//2
 
     //should be good enough for generating seeds
     std::srand(293687);

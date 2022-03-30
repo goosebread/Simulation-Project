@@ -147,7 +147,8 @@ void ParameterServer::connectWorker(ProcessingUnit* unit){
 Stats ParameterServer::outputStats(){
     Stats s = Stats();
     double time = Environment::getInstance()->getTime();
-    s.throughput = tasksDone/time;
+    //WARNING the last task doesn't actually get marked as done; the simulation just stops. hence the +1
+    s.throughput = (tasksDone+1)/time;
     double total_busy = 0;
     for (const auto worker:workers){
         total_busy+=worker.second->t_busy;
