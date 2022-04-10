@@ -36,5 +36,11 @@ void Environment::runSim(){
     Utils::Logger::getInstance()->file<<std::flush;
 }
 
+void Environment::reset(){
+    Node::totalNodes = 0;
+    currentTime=0;
+    nodes.clear();
+}
+
 }//end namespace network
 

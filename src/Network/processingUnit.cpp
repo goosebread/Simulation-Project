@@ -47,8 +47,9 @@ void ProcessingUnit::processPull(){
 }
 void ProcessingUnit::updateStats(){
     double t_current = Environment::getInstance()->getTime();
-    if(busy){ t_busy+=(t_current-t_last); }
+    if(busy_last){ t_busy+=(t_current-t_last); }
     t_last = t_current;
+    busy_last = busy;
 }
 void ProcessingUnit::reset(){
     iteration=0;

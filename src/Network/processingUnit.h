@@ -25,6 +25,7 @@ private:
     
     bool busy;
     double t_last;
+    bool busy_last;
     double t_busy;
 
     //random components
@@ -50,8 +51,8 @@ private:
 
 public:
     ProcessingUnit(double CV, unsigned seed)
-        :Node(),rng{seed},gamma{1.0/CV*CV,(CV*CV)},
-        iteration{0},t_last{0},t_busy{0},busy{false}{
+        :Node(),rng{seed},gamma{1.0/(CV*CV),(CV*CV)},
+        iteration{0},t_last{0},t_busy{0},busy{false},busy_last{false}{
     }
 
     void connectController(ParameterServer* unit);
@@ -59,7 +60,7 @@ public:
 
     //for now it only tracks utilization. Eventually, we might want higher order stats
     void updateStats() override;
-    //~ProcessingUnit(){}
+    ~ProcessingUnit(){}
 };
 
 }//end namespace
