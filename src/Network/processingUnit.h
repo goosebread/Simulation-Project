@@ -60,7 +60,7 @@ public:
 
     //for now it only tracks utilization. Eventually, we might want higher order stats
     void updateStats() override;
-    //~ProcessingUnit(){}
+    ~ProcessingUnit(){}
 };
 
 }//end namespace

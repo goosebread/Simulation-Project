@@ -47,6 +47,9 @@ public:
     //make sure to add initial task to queue
     //before running the simulation
     void runSim();
+
+    //deletes all known nodes and resets simulation environment
+    void reset();
 };
 
 }//end namespace network

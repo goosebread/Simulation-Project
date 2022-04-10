@@ -152,10 +152,10 @@ Stats ParameterServer::outputStats(){
     double total_busy = 0;
     for (const auto worker:workers){
         total_busy+=worker.second->t_busy;
-        std::cout<<worker.second->t_busy<<std::endl;
+        //std::cout<<worker.second->t_busy<<std::endl;
     }
-    std::cout<<time<<std::endl;
-    std::cout<<workers.size()<<std::endl;
+    //std::cout<<time<<std::endl;
+    //std::cout<<workers.size()<<std::endl;
     s.avgUtilization = total_busy/(time*workers.size());
     return s;
 }
