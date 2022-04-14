@@ -94,7 +94,7 @@ int main(){
         int n_Workers = std::stoi(row[1]);//3;
         int window = std::stoi(row[2]);//12;
         double CV = std::stod(row[3]);//2
-        unsigned seed = std::stoi(row[4]);
+        unsigned int seed = std::stoi(row[4]);
 
         Network::Stats stats = createSim(iters,n_Workers,window,CV,seed,false);
         fout<<line<<","<<stats.throughput<<","<<stats.avgUtilization<<std::endl;
