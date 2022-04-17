@@ -38,13 +38,15 @@ void ParameterServer::initializeTasks(){
         schedulePull(worker.second->getID());
         worker.second->reset();
     }
+    idleHistogram.clear();
+    idleHistogram.push_back(0);
+    maxIdle=0;
+    t_last=0;
 }
 
 //some network traffic delay between pushing and pulling
 void ParameterServer::schedulePull(int workerID){
     auto env = Environment::getInstance();
-
-    constexpr double networkDelay = 0.01;//TODO MAKE THIS REAL VARIABLE
 
     Event task{env->getTime()+networkDelay, nodeID, workerID};
     env->addEvent(task);
@@ -53,13 +55,12 @@ void ParameterServer::schedulePull(int workerID){
     Utils::Logger::getInstance()->file<<"scheduling pull\n";
 }
 
-//gets run when its actually time to send a task to processing unit
-//bad hard coded names :(
-//"departure"
+//signal the worker to pull updated parameters
 void ParameterServer::doPull(int workerID){
     workers.at(workerID)->processPull();
 }
 
+//process the push event from worker
 void ParameterServer::processPush(int workerID,int iteration){
     //log event
     Utils::Logger::getInstance()->file<<"PS recieved push\n";
@@ -74,11 +75,14 @@ void ParameterServer::processPush(int workerID,int iteration){
 
     //exit condition for simulation //NOTE if a worker reaches the last iteration, 
     //it will be idle but not in idleWorkers, which is meant as a temporary holding space
+    //As long as the simulation is run for enough iterations, the exact initial and ending conditions 
+    //will not significantly effect the long term statistics
     if(iteration<totalTasks){
         //send to holding list if too far ahead
         //otherwise schedule next
         if (iteration==tasksDone+1+windowSize){
             Utils::Logger::getInstance()->file<<"worker "<<workerID<<" to idle\n";
+            updateHistogram();
             idleWorkers.push_front(workerID);
 
             //zero window case
@@ -99,6 +103,25 @@ void ParameterServer::processPush(int workerID,int iteration){
     }
 }
 
+//This function collects data for the idle workers histogram
+//make sure to call before updating the idleWorkers list
+void ParameterServer::updateHistogram(){
+    int numIdle = std::distance(idleWorkers.begin(),idleWorkers.end());
+    double t_current = Environment::getInstance()->getTime();
+    double timeIdle = t_current-t_last;
+
+    if(numIdle>maxIdle){
+        //update max, add zero entries to the histogram
+        for (int i=maxIdle;i<numIdle;i++){
+            idleHistogram.push_back(0);
+        }
+        maxIdle = numIdle;
+    }
+    idleHistogram.at(numIdle)+=timeIdle;
+    t_last = t_current;
+}
+
+//check if the weights can be updated/if this iteration step is done
 void ParameterServer::checkUpdate(){
     //update if all workers are done/TRUE for the next task
     bool status = true;
@@ -116,6 +139,7 @@ void ParameterServer::checkUpdate(){
     if(status){
         tasksDone++;
         //release workers in holding
+        updateHistogram();
         while (!idleWorkers.empty()){
             schedulePull(idleWorkers.front());
             idleWorkers.pop_front();
@@ -144,11 +168,13 @@ void ParameterServer::connectWorker(ProcessingUnit* unit){
     }
 }
 
+//Function called after simulation terminates to access the collected output data
 Stats ParameterServer::outputStats(){
     Stats s = Stats();
     double time = Environment::getInstance()->getTime();
+    s.adjustedExecutionTime = time/workers.size();//Assuming ideal linear model
     //WARNING the last task doesn't actually get marked as done; the simulation just stops. hence the +1
-    s.throughput = (tasksDone+1)/time;
+    s.throughput = (tasksDone+1)/s.adjustedExecutionTime;
     double total_busy = 0;
     for (const auto worker:workers){
         total_busy+=worker.second->t_busy;
@@ -157,6 +183,15 @@ Stats ParameterServer::outputStats(){
     //std::cout<<time<<std::endl;
     //std::cout<<workers.size()<<std::endl;
     s.avgUtilization = total_busy/(time*workers.size());
+
+    updateHistogram();
+    std::vector<double> histogram = idleHistogram;
+    //normalize
+    for(int i=0; i<histogram.size(); i++){
+        histogram[i]/=time;
+    }
+    s.idleHistogram = histogram;
+
     return s;
 }
 

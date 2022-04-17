@@ -10,26 +10,17 @@
 #include "event.h"
 #include "processingUnit.h"
 
-//vector of units, "hold/wait"
-//send units to the wait vector if they're too far ahead
-//upon update empty the hold vector and let them pull
-
-//create a matrix as the rotating window (mod windowsize to reuse space as things fill up)
-//each row is an iteration group
-//each col is worker status (0 for not done yet, 1 for done)
-
-//or list/vector of "iterationStatus structs/maps"
-
-//we need more information being communicated between ps and workers (eg iteration group )
-
-
+//Single Parameter Server to allow workers to do pull requests and push updates
 namespace Network{
 
+//Stats that are tracked and returned as simulation output
 struct Stats{
-    double throughput;
-    double avgUtilization;
-
-    Stats(double tpt=0, double utl=0):throughput{tpt}, avgUtilization{utl}{}
+    double throughput;//throughput calculated using adjected Execution time
+    double avgUtilization;//utilization averaged across all worker units
+    double adjustedExecutionTime;//1 time unit is the average iteration step time for a 1 worker system
+                                 //The ideal linear PS model is assumed where the time it takes n workers to do 1 iteration step is 1/n time units
+    std::vector<double> idleHistogram; //histogram starting from 0 for how often n workers are idle
+    Stats(double tpt=0, double utl=0, double ext=0):throughput{tpt}, avgUtilization{utl}, adjustedExecutionTime{ext}{}
 };
 
 //forward class declaration
@@ -44,9 +35,9 @@ private:
 
     int windowSize;//for bounded delay model
 
-    //random components
-    //std::mt19937 rng;
-    //std::normal_distribution<double> gaussian;
+    //negligable network delay and weight update time
+    //the simulation works better when the next event doesn't trigger instantaneously
+    static constexpr double networkDelay = 0.01;
 
     //keeps track of workers to call their functions
     std::map<int,ProcessingUnit*> workers;
@@ -76,6 +67,12 @@ private:
     //event 0 initialization event
     void initializeTasks();
 
+    //records histogram of worker idle frequency
+    std::vector<double> idleHistogram;
+    int maxIdle;
+    double t_last;
+    void updateHistogram();
+
 public:
     ParameterServer(int tasks, int windowSz);
     void doEvent(int EventID) override;
@@ -87,10 +84,7 @@ public:
         }
     }
 
-    //track jobs done per unit time
-    //lets make it check for all first and later make it distributed
-    //sacrifice efficiency for "I need to have this working today"
-
+    //If we ever need it:
     //void updateStats() override;
 
     Stats outputStats();

@@ -10,6 +10,7 @@
 #include "Network/processingUnit.h"
 #include "Network/event.h"
 
+//Single Simulation run
 Network::Stats createSim(int iters, int n_Workers, int window, double CV, unsigned seed, bool verbose){
     //should be good enough for generating seeds
     std::srand(seed);
@@ -30,7 +31,6 @@ Network::Stats createSim(int iters, int n_Workers, int window, double CV, unsign
     //add initialization event
     Network::Environment* env = Network::Environment::getInstance();
     env->addEvent(Network::Event(0,0,0));
-
     //run
     env->runSim();
     
@@ -53,9 +53,10 @@ Network::Stats createSim(int iters, int n_Workers, int window, double CV, unsign
 }
 
 
+//Read the SimInputs.csv file and run all specified simulations
 int main(){
+    //filepath is hard coded. could make it into a user input in future
     std::string filepath = "SimInputs.csv";
-
     std::ifstream fin;
     fin.open(filepath);
     if(!fin){
@@ -69,7 +70,7 @@ int main(){
     //ignore header row
     std::string line;
     std::getline(fin, line);
-    fout<<line<<",Throughput,AvgUtilization"<<std::endl;
+    fout<<line<<",Throughput,AvgUtilization,AdjustedExecutionTime,IdleHistogram"<<std::endl;
 
     //data rows
     while (std::getline(fin, line)){
@@ -80,7 +81,6 @@ int main(){
         // store it in a string variable, 'word'
         std::vector<std::string> row{};
         std::string word;
-
         while (std::getline(s, word, ',')) {
             row.push_back(word);
         }
@@ -90,14 +90,18 @@ int main(){
             return 0;
         }
 
-        int iters = std::stoi(row[0]);//10000;
+        int iters = std::stoi(row[0]);//example value: 10000;
         int n_Workers = std::stoi(row[1]);//3;
         int window = std::stoi(row[2]);//12;
-        double CV = std::stod(row[3]);//2
+        double CV = std::stod(row[3]);//2.0
         unsigned int seed = std::stoi(row[4]);
 
         Network::Stats stats = createSim(iters,n_Workers,window,CV,seed,false);
-        fout<<line<<","<<stats.throughput<<","<<stats.avgUtilization<<std::endl;
+        fout<<line<<","<<stats.throughput<<","<<stats.avgUtilization<<","<<stats.adjustedExecutionTime;
+        for(int i=0; i<stats.idleHistogram.size(); i++){
+            fout<<","<<stats.idleHistogram[i];
+        }
+        fout<<std::endl;
     }
     fin.close();
     fout<<std::flush;
