@@ -69,8 +69,8 @@ int main(){
   
     //ignore header row
     std::string line;
-    std::getline(fin, line);
-    fout<<line<<",Throughput,AvgUtilization,AdjustedExecutionTime,IdleHistogram"<<std::endl;
+    std::getline(fin, line,'\n');
+    fout<<line.substr(0,line.length()-1)<<",Throughput,AvgUtilization,AdjustedExecutionTime,IdleHistogram"<<std::endl;
 
     //data rows
     while (std::getline(fin, line)){
@@ -97,7 +97,7 @@ int main(){
         unsigned int seed = std::stoi(row[4]);
 
         Network::Stats stats = createSim(iters,n_Workers,window,CV,seed,false);
-        fout<<line<<","<<stats.throughput<<","<<stats.avgUtilization<<","<<stats.adjustedExecutionTime;
+        fout<<line.substr(0,line.length()-1)<<","<<stats.throughput<<","<<stats.avgUtilization<<","<<stats.adjustedExecutionTime;
         for(int i=0; i<stats.idleHistogram.size(); i++){
             fout<<","<<stats.idleHistogram[i];
         }
